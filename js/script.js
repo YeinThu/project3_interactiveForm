@@ -55,19 +55,23 @@ jobRole.addEventListener('change', (e) => {
 });
 
 // 'T-Shirt' section
+// Design menu event
 design.addEventListener('change', (e) => {
   const target = e.target
 
   // Enable 'Color' menu
   color.disabled = false;
 
-  for (let i = 0; i < colorOptions.length; i++) {
-    const dataTheme = colorOptions[i].getAttribute('data-theme');
+  for (let i = 1; i < colorOptions.length; i++) {
+    const colorTheme = colorOptions[i].getAttribute('data-theme');
 
-    
-    if (target.value === dataTheme) {
+    colorOptions[0].textContent = 'Please select a color';
+    color.value = 'Please select a color';
+
+    if (target.value === colorTheme) {
       colorOptions[i].hidden = false;
-    } else {
+    }
+    else {
       colorOptions[i].hidden = true;
     }
   }
@@ -159,28 +163,41 @@ function cvvValidation() {
 
 /* -------------------------------------------------------------------------------- */
 
-// Function to control validation message display
-function validationMessage(isElementValid, element, e) {
-  const elementId = e.target.getAttribute('id');
-  const elementIdCap = elementId.charAt(0).toUpperCase() + elementId.slice(1);
-
-  if (e.target.value.length !== 0) {
-    if (!isElementValid) {
-      e.preventDefault();
-      element.parentElement.className = 'not-valid';
-      element.parentElement.lastElementChild.style.display = "inline";
-      element.parentElement.lastElementChild.textContent = `${elementIdCap} must be formatted correctly`;
-    }
-    else {
-      element.parentElement.className = 'valid';
-      element.parentElement.lastElementChild.style.display = "none";
-    }
+// On Form submission validation
+function formSubmitValidation(isElementValid, element, e) {
+  if (!isElementValid) {
+    e.preventDefault();
+    console.log('fail');
+    element.parentElement.className = 'not-valid';
+    element.parentElement.lastElementChild.style.display = 'inline';
   }
   else {
-    element.parentElement.lastElementChild.style.display = "inline";
-    element.parentElement.lastElementChild.textContent = `${elementIdCap} cannot be blank`;
+    console.log('pass')
+    element.parentElement.className = 'valid';
+    element.parentElement.lastElementChild.style.display = 'none';
   }
+}
 
+// Error message display
+function errorDisplay(element, type, validationType) {
+  const inputLength = element.value.length;
+
+  if (!validationType) {
+    if (inputLength === 0) {
+      element.parentElement.className = 'not-valid';
+      element.parentElement.lastElementChild.style.display = 'inline';
+      element.parentElement.lastElementChild.textContent = `${type} field cannot be blank`;
+    }
+    else if (inputLength > 0) {
+      element.parentElement.className = 'not-valid';
+      element.parentElement.lastElementChild.style.display = 'inline';
+      element.parentElement.lastElementChild.textContent = `${type} must be formatted correctly`;
+    }
+  }
+  else if (validationType) {
+    element.parentElement.className = 'valid';
+    element.parentElement.lastElementChild.style.display = 'none';
+  }
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -211,26 +228,27 @@ function activityFilter(targetElement) {
 // Real-time error message (name field)
 name.addEventListener('keyup', (e) => {
   // Validate Name
-  validationMessage(nameValidation(), name, e);
+  errorDisplay(name, 'Name', nameValidation());
 })
 
 // Conditional error message (email field)
 email.addEventListener('keyup', (e) => {
   // Validate Email
-  validationMessage(emailValidation(), email, e);
-
+  errorDisplay(email, 'Email', emailValidation());
 })
 
 /* -------------------------------------------------------------------------------- */
 
 // 'Form' submission event
 form.addEventListener('submit', (e) => {
-
+  // e.preventDefault();
   // Validate Name
-  validationMessage(nameValidation(), name, e);
+  formSubmitValidation(nameValidation(), name, e);
+  errorDisplay(name, 'Name', nameValidation());
 
   // Validate Email
-  validationMessage(emailValidation(), email, e);
+  formSubmitValidation(emailValidation(), email, e);
+  errorDisplay(email, 'Email', emailValidation());
 
   // Validate Activities
   if (!activitiesValidation()) {
@@ -248,10 +266,12 @@ form.addEventListener('submit', (e) => {
   // Call credit card validation function if payment value is credit-card
   if (payment.value === 'credit-card') {
     // Validate credit card fields
-    validationMessage(creditCardValidation(), creditCardNumber, e);
-    validationMessage(zipCodeValidation(), zipcode, e);
-    validationMessage(cvvValidation(), cvvNumber, e);
+    console.log('correct');
+    formSubmitValidation(creditCardValidation(), creditCardNumber, e);
+    formSubmitValidation(zipCodeValidation(), zipcode, e);
+    formSubmitValidation(cvvValidation(), cvvNumber, e);
   }
+
 });
 
 // Add focus and blur states to activity checkboxes
